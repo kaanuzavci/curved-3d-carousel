@@ -585,8 +585,14 @@ export default function CylinderCarousel() {
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(now - last, 50); last = now;
+      /* Glide detection first: while a card change is in flight the auto
+         creep is PAUSED, so the target stays pinned to the snap point and
+         the new card starts exactly from its resting position — no carried
+         momentum bleeding into the start of the next card. */
+      const gliding = Math.abs(targetRef.current - spinRot) > 0.05;
+      glideT = gliding ? glideT + dt : 0;
       if (!isDragRef.current) {
-        targetRef.current -= AUTO_SPD * dt;
+        if (!gliding) targetRef.current -= AUTO_SPD * dt;
         velRef.current *= 0.88; targetRef.current += velRef.current;
         /* Threshold snap: drift slowly away from the resting card; once the
            creep crosses SNAP_AT, jump the target to the next snap point so the
@@ -600,10 +606,7 @@ export default function CylinderCarousel() {
          over the first ~500ms of a glide (smoothstep), so the transition
          accelerates from slow instead of jumping to a flat constant speed;
          the lerp still gives a soft landing at the end. */
-      const gap = targetRef.current - spinRot;
-      const gliding = Math.abs(gap) > 0.05;
-      glideT = gliding ? glideT + dt : 0;
-      let step = gap * 0.074;
+      let step = (targetRef.current - spinRot) * 0.074;
       if (!isDragRef.current) {
         const r = Math.min(glideT / 500, 1);
         const eased = r * r * (3 - 2 * r);
