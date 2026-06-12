@@ -83,6 +83,9 @@ const FOV = 56;                  // narrower FOV = larger cards on screen
    TILT_X was causing the front face to point downward, dropping cards off-screen. */
 const TILT_Z = 0.13;                  // 12.6° — left-low / right-high (/) diagonal
 const TILT_X = 0.00;                  // must be 0: any X-tilt pushes front face below viewport
+/* Hover pitch: max dynamic X-tilt driven by pointer height. Kept well below
+   the level where the front face starts dropping out of the viewport. */
+const HOVER_PITCH = 0.055;            // ~3.2° — subtle hand-held wobble
 
 /* ─── Texture — full atmospheric scene, NO text panel ─────
    Ratio: arc / CARD_H = (720 × 0.565) / 300 ≈ 1.356
@@ -577,6 +580,7 @@ export default function CylinderCarousel() {
 
     /* ── Tick ── */
     let spinRot = 0, curActive = 0, raf = 0, glideT = 0;
+    let pitch = 0, pitchTarget = 0;   // pointer-driven cylinder pitch
     const AUTO_SPD = 0.00004;        // slow creep between cards
     const SNAP_AT = THETA * 0.30;   // past this point, commit & glide to the next card
     const MAX_SPIN = 0.00075;        // rad/ms speed cap — keeps the card-to-card glide gradual
@@ -624,6 +628,11 @@ export default function CylinderCarousel() {
       spinRot += step;
       spinGroup.rotation.y = spinRot;
 
+      /* Hand-held wobble: ease the pitch toward the pointer-driven target.
+         Applied to tiltGroup so it composes with the fixed diagonal tilt. */
+      pitch += (pitchTarget - pitch) * (1 - Math.exp(-0.005 * dt));
+      tiltGroup.rotation.x = TILT_X + pitch;
+
       let newActive = 0, maxF = -Infinity;
       meshes.forEach((mesh, i) => {
         const mat = mesh.material as THREE.ShaderMaterial;
@@ -661,9 +670,20 @@ export default function CylinderCarousel() {
     const onWheel = (e: WheelEvent) => { e.preventDefault(); targetRef.current -= e.deltaY * 0.0025; };
     el.addEventListener("wheel", onWheel, { passive: false });
     const onDown = (e: PointerEvent) => { isDragRef.current = true; lastXRef.current = e.clientX; lastTRef.current = performance.now(); velRef.current = 0; el.setPointerCapture(e.pointerId); };
-    const onMove = (e: PointerEvent) => { if (!isDragRef.current) return; const dx = e.clientX - lastXRef.current, dt2 = performance.now() - lastTRef.current + 1; targetRef.current += dx * 0.0038; velRef.current = dx * 0.0038 / dt2 * 16; lastXRef.current = e.clientX; lastTRef.current = performance.now(); };
+    const onMove = (e: PointerEvent) => {
+      // Pointer height → pitch target (top of the cards = lean toward viewer)
+      const r = el.getBoundingClientRect();
+      const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+      pitchTarget = -ny * HOVER_PITCH;
+      if (!isDragRef.current) return;
+      const dx = e.clientX - lastXRef.current, dt2 = performance.now() - lastTRef.current + 1;
+      targetRef.current += dx * 0.0038; velRef.current = dx * 0.0038 / dt2 * 16;
+      lastXRef.current = e.clientX; lastTRef.current = performance.now();
+    };
     const onUp = () => { isDragRef.current = false; };
+    const onLeave = () => { pitchTarget = 0; };
     el.addEventListener("pointerdown", onDown); el.addEventListener("pointermove", onMove); el.addEventListener("pointerup", onUp); el.addEventListener("pointercancel", onUp);
+    el.addEventListener("pointerleave", onLeave);
     const onKey = (e: KeyboardEvent) => { if (e.key === "ArrowLeft") goPrev(); if (e.key === "ArrowRight") goNext(); };
     window.addEventListener("keydown", onKey);
 
@@ -672,6 +692,7 @@ export default function CylinderCarousel() {
       window.removeEventListener("resize", onResize); window.removeEventListener("keydown", onKey);
       el.removeEventListener("wheel", onWheel); el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerup", onUp); el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("pointerleave", onLeave);
       renderer.dispose(); if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
