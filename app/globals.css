@@ -30,8 +30,8 @@ body {
 
 /* ═══ NAVBAR ═══ */
 
-/* "APE" — living gold shimmer, clipped into the letterforms */
-.logo-ape {
+/* "CURVED" — living gold shimmer, clipped into the letterforms */
+.logo-grad {
   background: linear-gradient(
     110deg,
     #ffd76a 0%,
@@ -47,8 +47,8 @@ body {
   animation: logo-shimmer 7s linear infinite;
 }
 
-/* "CHAIN" — hollow outline counterpart */
-.logo-chain {
+/* "3D" — hollow outline counterpart */
+.logo-outline {
   color: transparent;
   -webkit-text-stroke: 1px rgba(255, 255, 255, 0.82);
   text-stroke: 1px rgba(255, 255, 255, 0.82);

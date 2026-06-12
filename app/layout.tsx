@@ -24,8 +24,8 @@ const oxanium = Oxanium({
 });
 
 export const metadata: Metadata = {
-  title: "ApeChain — The Layer 3 for APE",
-  description: "Explore the ApeChain ecosystem.",
+  title: "Curved3D — Curved 3D Carousel",
+  description: "Explore the Curved3D carousel experience.",
 };
 
 export default function RootLayout({

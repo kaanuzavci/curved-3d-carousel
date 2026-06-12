@@ -574,8 +574,9 @@ export default function CylinderCarousel() {
 
     /* ── Tick ── */
     let spinRot = 0, curActive = 0, raf = 0;
-    const AUTO_SPD = 0.00006;        // slow creep between cards
-    const SNAP_AT = THETA * 0.30;   // past this point, commit & accelerate to the next card
+    const AUTO_SPD = 0.00004;        // slow creep between cards
+    const SNAP_AT = THETA * 0.30;   // past this point, commit & glide to the next card
+    const MAX_SPIN = 0.00075;        // rad/ms speed cap — keeps the card-to-card glide gradual
     let last = performance.now();
 
     const tick = (now: number) => {
@@ -592,7 +593,14 @@ export default function CylinderCarousel() {
         if (over > SNAP_AT) targetRef.current = nearest - THETA;
         else if (over < -SNAP_AT) targetRef.current = nearest + THETA;
       }
-      spinRot += (targetRef.current - spinRot) * 0.074;
+      /* Eased follow with a speed cap: the cap turns the snap into a steady,
+         perceptible glide; the lerp still gives a soft landing at the end. */
+      let step = (targetRef.current - spinRot) * 0.074;
+      if (!isDragRef.current) {
+        const max = MAX_SPIN * dt;
+        if (step > max) step = max; else if (step < -max) step = -max;
+      }
+      spinRot += step;
       spinGroup.rotation.y = spinRot;
 
       let newActive = 0, maxF = -Infinity;
@@ -682,7 +690,7 @@ export default function CylinderCarousel() {
         <a href="#" className="flex items-center gap-3">
           <svg className="logo-mark" width="34" height="34" viewBox="0 0 40 40" fill="none">
             <defs>
-              <linearGradient id="apeGrad" x1="0" y1="0" x2="1" y2="1">
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stopColor="#ffd76a" />
                 <stop offset="55%" stopColor="#ff8a40" />
                 <stop offset="100%" stopColor="#d85a10" />
@@ -690,22 +698,24 @@ export default function CylinderCarousel() {
             </defs>
             {/* Outer hex */}
             <polygon points="20,2 36,11 36,29 20,38 4,29 4,11"
-              stroke="url(#apeGrad)" strokeWidth="1.8" fill="rgba(255,138,64,0.05)" />
+              stroke="url(#logoGrad)" strokeWidth="1.8" fill="rgba(255,138,64,0.05)" />
             {/* Inner hex */}
             <polygon points="20,9 30,14.5 30,25.5 20,31 10,25.5 10,14.5"
               stroke="rgba(255,255,255,0.30)" strokeWidth="1" fill="none" />
-            {/* "A" letterform */}
-            <path d="M14.5 25.5 L20 13 L25.5 25.5 M16.6 21 H23.4"
-              stroke="url(#apeGrad)" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            {/* Curved "C" with a 3D depth echo */}
+            <path d="M25.8 14.6 A7.6 7.6 0 1 0 25.8 25.4"
+              stroke="url(#logoGrad)" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+            <path d="M28.2 17.2 A7.6 7.6 0 0 1 28.2 22.8"
+              stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
           </svg>
           <span className="flex flex-col leading-none">
             <span className="text-[17px] tracking-[0.18em]" style={{ fontFamily: "var(--font-anton),sans-serif" }}>
-              <span className="logo-ape">APE</span>
-              <span className="logo-chain">CHAIN</span>
+              <span className="logo-grad">CURVED</span>
+              <span className="logo-outline">3D</span>
             </span>
             <span className="mt-1 text-[7.5px] tracking-[0.52em] text-white/35"
               style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 500 }}>
-              THE APE NETWORK
+              CAROUSEL EXPERIENCE
             </span>
           </span>
         </a>
