@@ -585,14 +585,12 @@ export default function CylinderCarousel() {
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(now - last, 50); last = now;
-      /* Glide detection first: while a card change is in flight the auto
-         creep is PAUSED, so the target stays pinned to the snap point and
-         the new card starts exactly from its resting position — no carried
-         momentum bleeding into the start of the next card. */
-      const gliding = Math.abs(targetRef.current - spinRot) > 0.05;
-      glideT = gliding ? glideT + dt : 0;
+      /* The auto creep is PAUSED while a card change is in flight, so the
+         target stays pinned to the snap point and the new card starts
+         exactly from its resting position. */
+      const settled = Math.abs(targetRef.current - spinRot) <= 0.02;
       if (!isDragRef.current) {
-        if (!gliding) targetRef.current -= AUTO_SPD * dt;
+        if (settled) targetRef.current -= AUTO_SPD * dt;
         velRef.current *= 0.88; targetRef.current += velRef.current;
         /* Threshold snap: drift slowly away from the resting card; once the
            creep crosses SNAP_AT, jump the target to the next snap point so the
@@ -602,12 +600,22 @@ export default function CylinderCarousel() {
         if (over > SNAP_AT) targetRef.current = nearest - THETA;
         else if (over < -SNAP_AT) targetRef.current = nearest + THETA;
       }
-      /* Eased follow with a ramped speed cap: the cap rises from ~15% to 100%
-         over the first ~500ms of a glide (smoothstep), so the transition
-         accelerates from slow instead of jumping to a flat constant speed;
-         the lerp still gives a soft landing at the end. */
-      let step = (targetRef.current - spinRot) * 0.074;
-      if (!isDragRef.current) {
+
+      /* Glide state — evaluated AFTER the snap so the cap already applies on
+         the commit frame. The 0.02 settle threshold keeps the whole
+         deceleration inside the glide: at handoff the follow speed is already
+         near creep speed, so the new card continues at its slow pace with no
+         leftover fast tail. */
+      const gliding = Math.abs(targetRef.current - spinRot) > 0.02;
+      glideT = gliding ? glideT + dt : 0;
+
+      /* Frame-rate-independent eased follow (≈ the old 0.074/frame at 60fps),
+         with a ramped speed cap during glides only: the cap rises from ~15%
+         to 100% over the first ~500ms (smoothstep) so the transition
+         accelerates from slow, peaks, then the lerp lands it softly. */
+      const follow = 1 - Math.exp(-0.0046 * dt);
+      let step = (targetRef.current - spinRot) * follow;
+      if (!isDragRef.current && gliding) {
         const r = Math.min(glideT / 500, 1);
         const eased = r * r * (3 - 2 * r);
         const max = MAX_SPIN * (0.15 + 0.85 * eased) * dt;
