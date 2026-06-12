@@ -667,8 +667,6 @@ export default function CylinderCarousel() {
 
     const onResize = () => { const w = el.clientWidth, h = el.clientHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); };
     window.addEventListener("resize", onResize);
-    const onWheel = (e: WheelEvent) => { e.preventDefault(); targetRef.current -= e.deltaY * 0.0025; };
-    el.addEventListener("wheel", onWheel, { passive: false });
     const onDown = (e: PointerEvent) => { isDragRef.current = true; lastXRef.current = e.clientX; lastTRef.current = performance.now(); velRef.current = 0; el.setPointerCapture(e.pointerId); };
     const onMove = (e: PointerEvent) => {
       // Pointer height → pitch target (top of the cards = lean toward viewer)
@@ -690,7 +688,7 @@ export default function CylinderCarousel() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize); window.removeEventListener("keydown", onKey);
-      el.removeEventListener("wheel", onWheel); el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerup", onUp); el.removeEventListener("pointercancel", onUp);
       el.removeEventListener("pointerleave", onLeave);
       renderer.dispose(); if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
