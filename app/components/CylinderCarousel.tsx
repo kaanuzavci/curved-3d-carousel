@@ -576,7 +576,7 @@ export default function CylinderCarousel() {
     });
 
     /* ── Tick ── */
-    let spinRot = 0, curActive = 0, raf = 0;
+    let spinRot = 0, curActive = 0, raf = 0, glideT = 0;
     const AUTO_SPD = 0.00004;        // slow creep between cards
     const SNAP_AT = THETA * 0.30;   // past this point, commit & glide to the next card
     const MAX_SPIN = 0.00075;        // rad/ms speed cap — keeps the card-to-card glide gradual
@@ -596,11 +596,18 @@ export default function CylinderCarousel() {
         if (over > SNAP_AT) targetRef.current = nearest - THETA;
         else if (over < -SNAP_AT) targetRef.current = nearest + THETA;
       }
-      /* Eased follow with a speed cap: the cap turns the snap into a steady,
-         perceptible glide; the lerp still gives a soft landing at the end. */
-      let step = (targetRef.current - spinRot) * 0.074;
+      /* Eased follow with a ramped speed cap: the cap rises from ~15% to 100%
+         over the first ~500ms of a glide (smoothstep), so the transition
+         accelerates from slow instead of jumping to a flat constant speed;
+         the lerp still gives a soft landing at the end. */
+      const gap = targetRef.current - spinRot;
+      const gliding = Math.abs(gap) > 0.05;
+      glideT = gliding ? glideT + dt : 0;
+      let step = gap * 0.074;
       if (!isDragRef.current) {
-        const max = MAX_SPIN * dt;
+        const r = Math.min(glideT / 500, 1);
+        const eased = r * r * (3 - 2 * r);
+        const max = MAX_SPIN * (0.15 + 0.85 * eased) * dt;
         if (step > max) step = max; else if (step < -max) step = -max;
       }
       spinRot += step;
@@ -626,7 +633,6 @@ export default function CylinderCarousel() {
       const nearestSnap = Math.round(targetRef.current / THETA) * THETA;
       const prog = Math.min(Math.abs(nearestSnap - targetRef.current) / SNAP_AT, 1);
       const dest = ((-Math.round(targetRef.current / THETA)) % N + N) % N;
-      const gliding = Math.abs(targetRef.current - spinRot) > 0.05;
       barRefs.current.forEach((bar, i) => {
         if (!bar) return;
         let fill = 0;
