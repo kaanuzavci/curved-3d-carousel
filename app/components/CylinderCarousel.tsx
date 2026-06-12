@@ -732,10 +732,10 @@ export default function CylinderCarousel() {
 
       {/* Canvas — spans only the content area between navbar and bottom bar */}
       <div ref={mountRef} className="absolute left-0 right-0 z-10 cursor-grab active:cursor-grabbing"
-        style={{ top: 64, bottom: 60 }} />
+        style={{ top: 72, bottom: 60 }} />
 
       {/* NAVBAR — transparent glass, background visible through empty areas */}
-      <nav className="absolute top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-8"
+      <nav className="absolute top-0 left-0 right-0 z-50 h-[72px] flex items-center justify-between px-8"
         style={{
           background: "linear-gradient(180deg, rgba(4,5,14,0.42) 0%, rgba(4,5,14,0.12) 65%, rgba(4,5,14,0) 100%)",
           backdropFilter: "blur(9px)",
@@ -772,8 +772,8 @@ export default function CylinderCarousel() {
               <span className="logo-grad">CURVED</span>
               <span className="logo-outline">3D</span>
             </span>
-            <span className="mt-1 text-[7.5px] tracking-[0.52em] text-white/35"
-              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 500 }}>
+            <span className="mt-1.5 text-[9px] tracking-[0.40em] text-white/65"
+              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>
               CAROUSEL EXPERIENCE
             </span>
           </span>
@@ -787,11 +787,6 @@ export default function CylinderCarousel() {
           ))}
         </div>
 
-        {/* CONNECT */}
-        <button className="text-[10px] tracking-[0.26em] px-5 py-2 text-white/70 border border-white/20 hover:border-[#ffb060]/70 hover:text-white hover:shadow-[0_0_22px_rgba(255,138,64,0.25)] transition-all duration-300"
-          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(4px)" }}>
-          CONNECT
-        </button>
       </nav>
 
       {/* LEFT INFO */}
