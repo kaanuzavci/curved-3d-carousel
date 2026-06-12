@@ -488,6 +488,9 @@ export default function CylinderCarousel() {
   const isDragRef = useRef(false);
   const lastXRef = useRef(0);
   const lastTRef = useRef(0);
+  /* Per-thumbnail progress bars, driven directly from the render loop
+     (no React state → no re-render churn at 60fps) */
+  const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
 
   const goTo = (idx: number) => {
@@ -614,6 +617,24 @@ export default function CylinderCarousel() {
         mat.uniforms.uO.value = ff * 0.78 + 0.22 + fb * 0.08;
       });
       if (newActive !== curActive) { curActive = newActive; setActiveIdx(newActive); }
+
+      /* ── Thumbnail progress bars ──
+         Driven by the same angles as the rotation, so the bar, the spin and
+         the active highlight can never drift out of sync:
+         - creep phase  → bar fills as the drift approaches SNAP_AT
+         - glide phase  → outgoing card's bar pinned full, incoming stays empty */
+      const nearestSnap = Math.round(targetRef.current / THETA) * THETA;
+      const prog = Math.min(Math.abs(nearestSnap - targetRef.current) / SNAP_AT, 1);
+      const dest = ((-Math.round(targetRef.current / THETA)) % N + N) % N;
+      const gliding = Math.abs(targetRef.current - spinRot) > 0.05;
+      barRefs.current.forEach((bar, i) => {
+        if (!bar) return;
+        let fill = 0;
+        if (i === dest) fill = gliding ? 0 : prog;
+        else if (i === curActive && gliding) fill = 1;
+        bar.style.transform = `scaleX(${fill})`;
+      });
+
       renderer.render(scene, camera);
     };
     raf = requestAnimationFrame(tick);
@@ -806,35 +827,41 @@ export default function CylinderCarousel() {
           {CARDS.map((cd, i) => {
             const active = i === activeIdx;
             return (
+              /* Fixed 48px box + constant 2px border: nothing in the row can
+                 shift or jump when the active card changes */
               <button key={cd.id} onClick={() => goTo(i)}
-                className={`relative overflow-hidden rounded-lg transition-all duration-300 cursor-pointer ${active ? "opacity-100" : "opacity-50 hover:opacity-85"}`}
+                className="relative overflow-hidden rounded-lg cursor-pointer transition-[border-color,box-shadow] duration-300"
                 style={{
-                  width: active ? 58 : 44, height: active ? 58 : 44,
-                  border: active ? "2px solid rgba(255,255,255,0.95)" : "1px solid rgba(255,255,255,0.18)",
-                  boxShadow: active ? `0 0 22px ${card.glow}90, 0 4px 14px rgba(0,0,0,0.5)` : "none",
+                  width: 48, height: 48,
+                  border: active ? "2px solid rgba(255,255,255,0.95)" : "2px solid rgba(255,255,255,0.10)",
+                  boxShadow: active ? `0 0 20px ${card.glow}80, 0 4px 12px rgba(0,0,0,0.5)` : "none",
                 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={cd.img} alt={cd.title} draggable={false}
-                  className="absolute inset-0 w-full h-full object-cover" />
-                {/* Legibility scrim + active underline */}
-                <span className="absolute inset-x-0 bottom-0 h-1/3"
-                  style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.55), transparent)" }} />
-                {active && (
-                  <motion.span layoutId="thumb-dash"
-                    className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-[2.5px] rounded-full bg-white" />
-                )}
+                  className="absolute inset-0 w-full h-full object-cover transition-[filter] duration-300"
+                  style={{ filter: active ? "none" : "brightness(0.42) saturate(0.75)" }} />
+                {/* Progress: track + fill (fill is animated from the render loop) */}
+                <span className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: "rgba(0,0,0,0.45)" }} />
+                <span ref={el => { barRefs.current[i] = el; }}
+                  className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-white"
+                  style={{ transform: "scaleX(0)" }} />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* DOTS */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2">
+      {/* DOTS — fixed size, scale via transform so neighbours never shift */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5">
         {CARDS.map((cd, i) => (
           <button key={cd.id} onClick={() => goTo(i)}
-            className="rounded-full transition-all duration-300"
-            style={{ width: i === activeIdx ? 24 : 6, height: 6, background: i === activeIdx ? card.acc : "rgba(255,255,255,0.15)" }} />
+            className="rounded-full cursor-pointer transition-[background,transform,box-shadow] duration-300"
+            style={{
+              width: 7, height: 7,
+              background: i === activeIdx ? card.acc : "rgba(255,255,255,0.18)",
+              transform: i === activeIdx ? "scale(1.45)" : "scale(1)",
+              boxShadow: i === activeIdx ? `0 0 10px ${card.acc}` : "none",
+            }} />
         ))}
       </div>
     </div>
