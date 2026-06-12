@@ -85,7 +85,7 @@ const TILT_Z = 0.13;                  // 12.6° — left-low / right-high (/) di
 const TILT_X = 0.00;                  // must be 0: any X-tilt pushes front face below viewport
 /* Hover pitch: max dynamic X-tilt driven by pointer height. Kept well below
    the level where the front face starts dropping out of the viewport. */
-const HOVER_PITCH = 0.055;            // ~3.2° — subtle hand-held wobble
+const HOVER_PITCH = 0.015;            // ~3.2° — subtle hand-held wobble
 
 /* ─── Texture — full atmospheric scene, NO text panel ─────
    Ratio: arc / CARD_H = (720 × 0.565) / 300 ≈ 1.356
