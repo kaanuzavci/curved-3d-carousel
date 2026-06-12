@@ -108,6 +108,90 @@ a:hover .logo-mark {
   width: 100%;
 }
 
+/* ═══ PRELOADER ═══ */
+
+/* Stroke-draw loop. All paths carry pathLength=1, so dash values are
+   normalized; --i staggers paths to mimic line-by-line sketching.
+   One cycle: draw → hold → fade → rewind, repeating forever. */
+.bear-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bear-draw 3.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  animation-delay: calc(var(--i) * 0.22s);
+}
+
+@keyframes bear-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  52% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  76% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  90% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+/* Eyes: pop in after their surrounding lines, vanish with the fade */
+.bear-dot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bear-dot 3.8s ease infinite;
+  animation-delay: calc(var(--i) * 0.22s);
+}
+
+@keyframes bear-dot {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  54% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  60% {
+    transform: scale(1);
+  }
+  76% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* "LOADING EXPERIENCE" — soft breathing pulse */
+.loading-dots {
+  animation: loading-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 3px;
 }

@@ -1,5 +1,5 @@
-import CylinderCarousel from "./components/CylinderCarousel";
+import HomeShell from "./components/HomeShell";
 
 export default function Home() {
-  return <CylinderCarousel />;
+  return <HomeShell />;
 }
