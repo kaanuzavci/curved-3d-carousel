@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Anton, Barlow_Condensed, Oxanium } from "next/font/google";
-import CustomCursor from "./components/CustomCursor";
 import "./globals.css";
 
 const anton = Anton({
@@ -38,7 +37,6 @@ export default function RootLayout({
     <html lang="en" className={`${anton.variable} ${barlow.variable} ${oxanium.variable} h-full`}>
       <body className="h-full bg-[#0a0a0a] text-white antialiased overflow-x-hidden">
         {children}
-        <CustomCursor />
       </body>
     </html>
   );

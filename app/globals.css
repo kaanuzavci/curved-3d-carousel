@@ -194,71 +194,24 @@ a:hover .logo-mark {
 
 /* ═══ CUSTOM CURSOR ═══ */
 
-/* Hide the native cursor only for mouse-like pointers; touch devices
-   keep their default behaviour (the custom cursor never mounts there). */
+/* Classic arrow shape, slightly larger than the native one (~25px tall),
+   gold-gradient fill with a white outline and a baked-in amber glow.
+   SVG data-URI cursors track natively (zero lag); `auto`/`pointer`
+   fallbacks cover browsers without SVG cursor support. Hotspot 4 2 = tip.
+   Interactive elements get a brighter, stronger-glow variant. */
 @media (pointer: fine) {
   * {
-    cursor: none !important;
+    cursor: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%23ffd76a'/%3E%3Cstop%20offset='0.55'%20stop-color='%23ff8a40'/%3E%3Cstop%20offset='1'%20stop-color='%23d85a10'/%3E%3C/linearGradient%3E%3Cfilter%20id='f'%20filterUnits='userSpaceOnUse'%20x='0'%20y='0'%20width='32'%20height='32'%3E%3CfeDropShadow%20dx='0'%20dy='0'%20stdDeviation='2'%20flood-color='%23ff8a40'%20flood-opacity='0.8'/%3E%3C/filter%3E%3C/defs%3E%3Cpath%20filter='url(%23f)'%20d='M4%202%20L4%2024%20L9.5%2019%20L13%2027%20L16.5%2025.5%20L13%2017.8%20L20.5%2017.5%20Z'%20fill='url(%23g)'%20stroke='white'%20stroke-width='1.2'%20stroke-linejoin='round'/%3E%3C/svg%3E") 4 2, auto !important;
   }
-}
-
-/* Core dot — pinned to the pointer, hot white-gold center */
-.cursor-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0%, #ffd76a 45%, #ff8a40 100%);
-  box-shadow:
-    0 0 8px rgba(255, 215, 106, 0.95),
-    0 0 22px rgba(255, 138, 64, 0.6);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-/* Trailing ring — breathes constantly, flares on interactive elements */
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 176, 96, 0.6);
-  box-shadow:
-    0 0 14px rgba(255, 138, 64, 0.3),
-    inset 0 0 10px rgba(255, 138, 64, 0.16);
-  opacity: 0;
-  transition: opacity 0.25s ease, border-color 0.3s ease, background 0.3s ease;
-  animation: cursor-breathe 2.6s ease-in-out infinite;
-}
-.cursor-ring.is-hover {
-  border-color: rgba(255, 215, 106, 0.95);
-  background: rgba(255, 138, 64, 0.10);
-  box-shadow:
-    0 0 22px rgba(255, 138, 64, 0.55),
-    inset 0 0 14px rgba(255, 138, 64, 0.3);
-}
-
-@keyframes cursor-breathe {
-  0%,
-  100% {
-    box-shadow:
-      0 0 12px rgba(255, 138, 64, 0.26),
-      inset 0 0 9px rgba(255, 138, 64, 0.14);
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  [data-cursor="hover"] {
+    cursor: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%23fff3c4'/%3E%3Cstop%20offset='0.55'%20stop-color='%23ffb060'/%3E%3Cstop%20offset='1'%20stop-color='%23ff8a40'/%3E%3C/linearGradient%3E%3Cfilter%20id='f'%20filterUnits='userSpaceOnUse'%20x='0'%20y='0'%20width='32'%20height='32'%3E%3CfeDropShadow%20dx='0'%20dy='0'%20stdDeviation='3'%20flood-color='%23ffb060'%20flood-opacity='1'/%3E%3C/filter%3E%3C/defs%3E%3Cpath%20filter='url(%23f)'%20d='M4%202%20L4%2024%20L9.5%2019%20L13%2027%20L16.5%2025.5%20L13%2017.8%20L20.5%2017.5%20Z'%20fill='url(%23g)'%20stroke='white'%20stroke-width='1.4'%20stroke-linejoin='round'/%3E%3C/svg%3E") 4 2, pointer !important;
   }
-  50% {
-    box-shadow:
-      0 0 20px rgba(255, 138, 64, 0.45),
-      inset 0 0 13px rgba(255, 138, 64, 0.24);
-  }
-}
-
-/* Lazy halo — soft ambient light following far behind */
-.cursor-halo {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 138, 64, 0.13) 0%, transparent 65%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.4s ease;
 }
 
 ::-webkit-scrollbar {
