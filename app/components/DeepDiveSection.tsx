@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion";
 import CardPrism from "./CardPrism";
+import CardGallery from "./CardGallery";
 
 /* ═══════════════════════════════════════════════════════════════
    DEEP DIVE — one-viewport scroll section below the hero
@@ -23,12 +24,13 @@ import CardPrism from "./CardPrism";
    from → to are start/end offsets (vw, vh) measured from screen centre,
    so the card flies in from one edge and exits the opposite one.        */
 const DIVE_CARDS = [
-  { img: "/cards/otherside.jpg", title: "OTHERSIDE", cat: "GAMES", from: [-70, -46], to: [70, 46] }, // top-left → bottom-right
-  { img: "/cards/nexus.jpg", title: "NEXUS", cat: "MARKETPLACE", from: [70, -46], to: [-70, 46] }, // top-right → bottom-left
-  { img: "/cards/forge.jpg", title: "FORGE", cat: "STUDIO", from: [0, -52], to: [0, 52] }, // top-centre → bottom-centre
-  { img: "/cards/void.jpg", title: "VOID", cat: "DEFI", from: [-70, 46], to: [70, -46] }, // bottom-left → top-right
-  { img: "/cards/surge.jpg", title: "SURGE", cat: "LAUNCHPAD", from: [70, 46], to: [-70, -46] }, // bottom-right → top-left
-  { img: "/cards/arc.jpg", title: "ARC", cat: "BRIDGE", from: [-74, 0], to: [74, 0] }, // left → right across centre
+  { img: "/cards/otherside.jpg", title: "RENGOKU", cat: "FLAME HASHIRA", from: [-70, -46], to: [70, 46] }, // top-left → bottom-right
+  { img: "/cards/nexus.jpg", title: "GOJO", cat: "SORCERER", from: [70, -46], to: [-70, 46] }, // top-right → bottom-left
+  { img: "/cards/forge.jpg", title: "ASHE", cat: "FROST ARCHER", from: [0, -52], to: [0, 52] }, // top-centre → bottom-centre
+  { img: "/cards/void.jpg", title: "VINCENT", cat: "GUNSLINGER", from: [-70, 46], to: [70, -46] }, // bottom-left → top-right
+  { img: "/cards/surge.jpg", title: "AURELIA", cat: "CELESTIAL", from: [70, 46], to: [-70, -46] }, // bottom-right → top-left
+  { img: "/cards/arc.jpg", title: "AKARI", cat: "IDOL", from: [-74, 0], to: [74, 0] }, // left → right across centre
+  { img: "/cards/ariel.jpg", title: "ARIEL", cat: "PILOT", from: [0, -68], to: [0, 68], portrait: true }, // top → bottom, vertical card
 ] as const;
 
 const NCLICK = 6; // max simultaneous click ripples (must match the shader #define)
@@ -152,10 +154,10 @@ void main(){
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-function DiveCard({ prog, img, title, cat, from, to, i, total }: {
+function DiveCard({ prog, img, title, cat, from, to, i, total, portrait = false }: {
   prog: MotionValue<number>; img: string; title: string; cat: string;
   from: readonly [number, number]; to: readonly [number, number];
-  i: number; total: number;
+  i: number; total: number; portrait?: boolean;
 }) {
   /* The title holds the screen alone through the intro, then cards cross
      ONE AT A TIME: each gets its own sequential slot with only a little
@@ -170,7 +172,8 @@ function DiveCard({ prog, img, title, cat, from, to, i, total }: {
   const dir = (to[0] - from[0]) >= 0 ? 1 : -1;
   const x = useTransform(prog, [start, end], [`${from[0]}vw`, `${to[0]}vw`]);
   const y = useTransform(prog, [start, end], [`${from[1]}vh`, `${to[1]}vh`]);
-  const rotate = useTransform(prog, [start, end], [dir * 9, -dir * 7]);
+  // a portrait card drops straight down — keep it upright (no tilt)
+  const rotate = useTransform(prog, [start, end], portrait ? [0, 0] : [dir * 9, -dir * 7]);
   const opacity = useTransform(prog,
     [start, start + span * 0.20, end - span * 0.28, end],
     [0, 1, 1, 0]);
@@ -178,12 +181,12 @@ function DiveCard({ prog, img, title, cat, from, to, i, total }: {
 
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-      <motion.div className="w-[min(560px,90vw)]"
+      <motion.div className={portrait ? "w-[min(340px,64vw)]" : "w-[min(560px,90vw)]"}
         style={{ x, y, rotate, opacity, scale }}>
         <div className="relative overflow-hidden rounded-2xl"
           style={{ border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={img} alt={title} draggable={false} className="w-full h-[360px] object-cover" />
+          <img src={img} alt={title} draggable={false} className={`w-full object-cover ${portrait ? "h-[560px]" : "h-[360px]"}`} />
           <div className="absolute inset-x-0 bottom-0 px-6 pb-5 pt-12"
             style={{ background: "linear-gradient(0deg, rgba(2,4,9,0.88), transparent)" }}>
             <div className="text-[12px] tracking-[0.32em] text-white/55"
@@ -201,16 +204,29 @@ function DiveCard({ prog, img, title, cat, from, to, i, total }: {
    slight angles; hovering one doesn't just snap it on top — it turns toward
    the viewer (rotateY) and lifts as it comes forward, on a spring. */
 const PAIR_CARDS = [
-  { img: "/cards/bayc.jpg", title: "BAYC", cat: "COLLECTION", rot: -7, right: "21%", bottom: "15%" },
-  { img: "/cards/ape.jpg", title: "APE", cat: "TOKEN", rot: 6, right: "5%", bottom: "5%" },
+  { img: "/cards/eva.jpg", title: "EVA", cat: "DIVA", rot: -7, right: "21%", bottom: "15%" },
+  { img: "/cards/dani.jpg", title: "DANI", cat: "SOUL REAPER", rot: 6, right: "5%", bottom: "5%" },
 ] as const;
 
 function WallPair() {
   const [front, setFront] = useState<number | null>(null);
   // the card whose image is opened full-screen (null = closed)
   const [opened, setOpened] = useState<(typeof PAIR_CARDS)[number] | null>(null);
+  // the full "see all cards" gallery
+  const [galleryOpen, setGalleryOpen] = useState(false);
   return (
     <>
+      {/* SEE ALL CARDS — opens the full deck */}
+      <button
+        onClick={() => setGalleryOpen(true)}
+        className="group absolute left-1/2 bottom-[6%] z-30 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/25 bg-white/[0.04] px-7 py-3.5 text-white/85 backdrop-blur-sm transition-colors duration-300 hover:border-white/70 hover:text-white"
+        style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, letterSpacing: "0.24em", fontSize: 11 }}
+      >
+        SEE ALL CARDS
+        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </button>
+      <CardGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+
       {PAIR_CARDS.map((c, i) => (
         <motion.div
           key={c.title}
@@ -409,7 +425,7 @@ export default function DeepDiveSection() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={sectionRef} className="relative h-[400dvh]">
+    <section id="dive" ref={sectionRef} className="relative h-[400dvh]">
       <div className="sticky top-0 h-dvh overflow-hidden bg-[#020409]">
         {/* Water shader canvas */}
         <div ref={waterRef} className="absolute inset-0" />
@@ -438,7 +454,8 @@ export default function DeepDiveSection() {
 
           {DIVE_CARDS.map((c, i) => (
             <DiveCard key={c.title} prog={scrollYProgress} i={i} total={DIVE_CARDS.length}
-              img={c.img} title={c.title} cat={c.cat} from={c.from} to={c.to} />
+              img={c.img} title={c.title} cat={c.cat} from={c.from} to={c.to}
+              portrait={(c as { portrait?: boolean }).portrait ?? false} />
           ))}
         </motion.div>
 

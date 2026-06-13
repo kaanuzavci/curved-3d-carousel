@@ -145,7 +145,7 @@ export default function FishTransition() {
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[320dvh]">
+    <section id="deep" ref={sectionRef} className="relative h-[320dvh]">
       <div className="ft-env sticky top-0 h-dvh overflow-hidden bg-[#02060c]">
         {/* full water scene — surfaces from the dark as you scroll */}
         <motion.div className="absolute inset-0" style={{ opacity: bgOpacity, scale: bgScale }}>
@@ -287,27 +287,27 @@ export default function FishTransition() {
                 textShadow: "0 6px 40px rgba(0,0,0,0.55)",
               }}
             >
-              OWN THE<br />NEXT WAVE
+              DIVE<br />BACK IN
             </h2>
             <p
               className="mx-auto mt-6 max-w-xl text-white/75"
               style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, fontSize: "clamp(13px,1.6vw,17px)", textShadow: "0 2px 18px rgba(0,0,0,0.6)" }}
             >
-              A world of property, collectibles, finance and games — surfaced from the deep and ready to explore.
+              A passion-built playground of favourite characters and dreamlike worlds — rendered in real-time 3D, just for the love of it.
             </p>
             <a
-              href="#"
-              className="group mt-9 inline-flex items-center gap-3 rounded-full border border-white/30 px-9 py-4 text-white transition-colors duration-300 hover:border-white/80"
+              href="#top"
+              className="group pointer-events-auto mt-9 inline-flex items-center gap-3 rounded-full border border-white/30 px-9 py-4 text-white transition-colors duration-300 hover:border-white/80"
               style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, letterSpacing: "0.22em", fontSize: 12, backdropFilter: "blur(2px)" }}
             >
-              ENTER THE COLLECTION
-              <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              BACK TO TOP
+              <span className="transition-transform duration-300 group-hover:-translate-y-1">↑</span>
             </a>
             <div className="mx-auto mt-10 flex max-w-5xl flex-col items-center justify-between gap-4 border-t border-white/15 pt-6 md:flex-row">
               <p className="text-white/80" style={{ fontFamily: "var(--font-anton),sans-serif", letterSpacing: "0.18em", fontSize: 14 }}>CURVED 3D</p>
-              <p className="text-[11px] tracking-[0.18em] text-white/45">© 2026 — ALL RIGHTS RESERVED</p>
+              <p className="text-[11px] tracking-[0.18em] text-white/45">© 2026 — A HOBBY BUILD, MADE FOR FUN</p>
               <div className="flex gap-7">
-                {["TWITTER", "DISCORD", "OPENSEA"].map((s) => (
+                {["X", "INSTAGRAM", "ARTSTATION"].map((s) => (
                   <a key={s} href="#" className="text-[10px] tracking-[0.22em] text-white/45 transition-colors duration-300 hover:text-white" style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{s}</a>
                 ))}
               </div>

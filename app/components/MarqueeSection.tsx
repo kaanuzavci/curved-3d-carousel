@@ -13,18 +13,19 @@
 type Item = { word: string; img: string };
 
 const ROW_TOP: Item[] = [
-  { word: "PROPERTY", img: "/cards/otherside.jpg" },
-  { word: "COLLECTIBLES", img: "/cards/bayc.jpg" },
-  { word: "FINANCE", img: "/cards/void.jpg" },
-  { word: "INTANGIBLES", img: "/cards/arc.jpg" },
-  { word: "MARKETPLACE", img: "/cards/nexus.jpg" },
+  { word: "CHARACTERS", img: "/cards/otherside.jpg" },
+  { word: "LEGENDS", img: "/cards/bayc.jpg" },
+  { word: "HEROES", img: "/cards/void.jpg" },
+  { word: "REALMS", img: "/cards/arc.jpg" },
+  { word: "WORLDS", img: "/cards/nexus.jpg" },
 ];
 
 const ROW_BOTTOM: Item[] = [
-  { word: "INFRASTRUCTURE", img: "/cards/surge.jpg" },
+  { word: "ANIME", img: "/cards/surge.jpg" },
   { word: "GAMES", img: "/cards/forge.jpg" },
-  { word: "IDENTITY", img: "/cards/ape.jpg" },
-  { word: "REWARDS", img: "/cards/background.jpg" },
+  { word: "SHADERS", img: "/cards/ape.jpg" },
+  { word: "IN 3D", img: "/cards/ariel.jpg" },
+  { word: "DREAMS", img: "/cards/background.jpg" },
 ];
 
 function Cell({ word, img, reverse }: Item & { reverse?: boolean }) {
@@ -71,7 +72,7 @@ function Row({ items, dir, speed, reverse }: { items: Item[]; dir: "left" | "rig
 
 export default function MarqueeSection() {
   return (
-    <section className="relative overflow-hidden bg-[#dce8fb] py-[clamp(28px,5vw,72px)]">
+    <section id="deck" className="relative overflow-hidden bg-[#dce8fb] py-[clamp(28px,5vw,72px)]">
       <div className="flex flex-col gap-[clamp(14px,2vw,34px)]">
         <Row items={ROW_TOP} dir="left" speed={42} />
         <Row items={ROW_BOTTOM} dir="right" speed={48} reverse />

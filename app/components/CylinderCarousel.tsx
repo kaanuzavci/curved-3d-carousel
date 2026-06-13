@@ -3,56 +3,65 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
+import AboutOverlay from "./AboutOverlay";
+
+/* Quick-jump targets for the navbar — each "dimension" you scroll into */
+const NAV_LINKS = [
+  { label: "CAROUSEL", href: "#top" },
+  { label: "THE DIVE", href: "#dive" },
+  { label: "THE DECK", href: "#deck" },
+  { label: "THE DEEP", href: "#deep" },
+] as const;
 
 /* ═══════════════════════════════════════════════════════════════
    CARD DATA
 ═══════════════════════════════════════════════════════════════ */
 const CARDS = [
   {
-    id: "otherside", title: "OTHERSIDE", cat: "GAMES", hot: true, badge: "HOT",
-    desc: "Web3-enabled virtual worlds on ApeChain", cta: "LAUNCH",
+    id: "otherside", title: "RENGOKU", cat: "FLAME HASHIRA", hot: true, badge: "FIRE",
+    desc: "Set your heart ablaze — the Flame Hashira never yields", cta: "VIEW",
     sky: "#090200", hor: "#3c1400", acc: "#d85a10", glow: "#7a2800", hi: "#ff8a40", fl: "#1c0800", scn: 0,
     img: "/cards/otherside.jpg",
   },
   {
-    id: "nexus", title: "NEXUS", cat: "MARKETPLACE", hot: false, badge: null,
-    desc: "Trade digital assets on ApeChain with zero fees", cta: "LAUNCH APP",
+    id: "nexus", title: "GOJO", cat: "JUJUTSU SORCERER", hot: false, badge: null,
+    desc: "Throughout heaven and earth, he alone is honored", cta: "VIEW",
     sky: "#010510", hor: "#071840", acc: "#2868e8", glow: "#0820a0", hi: "#60a0ff", fl: "#020c20", scn: 1,
     img: "/cards/nexus.jpg",
   },
   {
-    id: "forge", title: "FORGE", cat: "STUDIO", hot: false, badge: "NEW",
-    desc: "Create and deploy NFT collections in minutes", cta: "BUILD",
+    id: "forge", title: "ASHE", cat: "FROST ARCHER", hot: false, badge: null,
+    desc: "A crystal arrow loosed across the frozen dark", cta: "VIEW",
     sky: "#010803", hor: "#083020", acc: "#18c050", glow: "#054020", hi: "#50ee80", fl: "#021405", scn: 2,
     img: "/cards/forge.jpg",
   },
   {
-    id: "void", title: "VOID", cat: "DEFI", hot: false, badge: null,
-    desc: "Next-gen DeFi primitives for the ape economy", cta: "ENTER VOID",
+    id: "void", title: "VINCENT", cat: "GUNSLINGER", hot: false, badge: null,
+    desc: "A cloaked specter bound to an undying past", cta: "VIEW",
     sky: "#040010", hor: "#180060", acc: "#9030e0", glow: "#400090", hi: "#c878ff", fl: "#080025", scn: 3,
     img: "/cards/void.jpg",
   },
   {
-    id: "surge", title: "SURGE", cat: "LAUNCHPAD", hot: false, badge: "LIVE",
-    desc: "Back the next wave of ApeChain projects early", cta: "EXPLORE",
+    id: "surge", title: "AURELIA", cat: "CELESTIAL", hot: false, badge: null,
+    desc: "Starlight gathers in her open palms", cta: "VIEW",
     sky: "#001010", hor: "#003840", acc: "#08c8b8", glow: "#005850", hi: "#50eedf", fl: "#001820", scn: 4,
     img: "/cards/surge.jpg",
   },
   {
-    id: "arc", title: "ARC", cat: "BRIDGE", hot: false, badge: null,
-    desc: "Move assets across chains seamlessly", cta: "BRIDGE",
+    id: "arc", title: "AKARI", cat: "IDOL", hot: false, badge: null,
+    desc: "Neon-bright, heart-sign ready, impossible to ignore", cta: "VIEW",
     sky: "#080400", hor: "#302000", acc: "#d08828", glow: "#704800", hi: "#ffcc60", fl: "#180e00", scn: 5,
     img: "/cards/arc.jpg",
   },
   {
-    id: "bayc", title: "BAYC", cat: "NFT", hot: true, badge: "HOT",
-    desc: "The original Bored Ape Yacht Club on-chain", cta: "VIEW",
+    id: "bayc", title: "KAKASHI", cat: "SHINOBI", hot: true, badge: "HOT",
+    desc: "Lightning in his palm, a thousand jutsu in his eye", cta: "VIEW",
     sky: "#080000", hor: "#3a0800", acc: "#e82818", glow: "#880808", hi: "#ff6050", fl: "#180000", scn: 6,
     img: "/cards/bayc.jpg",
   },
   {
-    id: "ape", title: "APE TOKEN", cat: "TOKEN", hot: false, badge: null,
-    desc: "The currency powering the ApeChain ecosystem", cta: "STAKE APE",
+    id: "ape", title: "KIRA", cat: "NETRUNNER", hot: false, badge: null,
+    desc: "Jacked into the neon sprawl, dancing through ICE", cta: "VIEW",
     sky: "#000510", hor: "#051030", acc: "#3858d8", glow: "#102880", hi: "#8ab0ff", fl: "#01081e", scn: 7,
     img: "/cards/ape.jpg",
   },
@@ -495,6 +504,7 @@ export default function CylinderCarousel() {
      (no React state → no re-render churn at 60fps) */
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const goTo = (idx: number) => {
     const cur = ((-Math.round(targetRef.current / THETA)) % N + N) % N;
@@ -699,7 +709,7 @@ export default function CylinderCarousel() {
   const card = CARDS[activeIdx];
 
   return (
-    <div className="relative w-full h-dvh overflow-hidden select-none">
+    <div id="top" className="relative w-full h-dvh overflow-hidden select-none">
       {/* Background image */}
       <div className="absolute inset-0" style={{
         backgroundImage: "url('/cards/background.jpg')",
@@ -777,15 +787,22 @@ export default function CylinderCarousel() {
           </span>
         </a>
 
-        {/* CENTER NAV */}
+        {/* CENTER NAV — quick-jump to each scroll dimension */}
         <div className="hidden md:flex items-center gap-12 absolute left-1/2 -translate-x-1/2">
-          {(["EXPLORE", "LEARN", "BUILD", "BRIDGE"] as const).map(l => (
-            <a key={l} href="#" className="nav-link text-[11px] tracking-[0.30em]"
-              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{l}</a>
+          {NAV_LINKS.map(l => (
+            <a key={l.label} href={l.href} className="nav-link text-[11px] tracking-[0.30em]"
+              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{l.label}</a>
           ))}
         </div>
 
+        {/* RIGHT — about */}
+        <button onClick={() => setAboutOpen(true)}
+          className="nav-link text-[11px] tracking-[0.30em]"
+          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, background: "none", border: "none" }}>
+          ABOUT
+        </button>
       </nav>
+      <AboutOverlay open={aboutOpen} onClose={() => setAboutOpen(false)} />
 
       {/* LEFT INFO */}
       <div className="absolute left-10 z-40 pointer-events-none"
