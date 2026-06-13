@@ -121,11 +121,14 @@ export default function DeepDiveSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const waterRef = useRef<HTMLDivElement>(null);
 
-  /* 0 → section top touches viewport bottom · 1 → page fully scrolled */
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end end"] });
-  const contentScale = useTransform(scrollYProgress, [0, 1], [0.92, 1.08]);
-  const titleOpacity = useTransform(scrollYProgress, [0.10, 0.45], [0, 1]);
-  const titleScale = useTransform(scrollYProgress, [0, 1], [0.82, 1.28]);
+  /* The wrapper is 2 viewports tall with a sticky 1-viewport child:
+     the section first slides in untouched; once it fully covers the
+     screen it PINS, and this progress runs 0 → 1 over the extra
+     viewport of scroll — that pinned phase is the dive. */
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
+  const contentScale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
+  const titleOpacity = useTransform(scrollYProgress, [0.02, 0.22], [0, 1]);
+  const titleScale = useTransform(scrollYProgress, [0, 1], [0.85, 1.3]);
 
   useEffect(() => {
     const el = waterRef.current, sec = sectionRef.current;
@@ -191,7 +194,8 @@ export default function DeepDiveSection() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={sectionRef} className="relative h-dvh overflow-hidden bg-[#020409]">
+    <section ref={sectionRef} className="relative h-[200dvh]">
+      <div className="sticky top-0 h-dvh overflow-hidden bg-[#020409]">
       {/* Water shader canvas */}
       <div ref={waterRef} className="absolute inset-0" />
 
@@ -199,7 +203,7 @@ export default function DeepDiveSection() {
       <div className="absolute top-0 inset-x-0 h-28 pointer-events-none"
         style={{ background: "linear-gradient(180deg, #04050e 0%, transparent 100%)" }} />
 
-      {/* Everything below scales up with scroll — the dive */}
+      {/* Everything below scales up while pinned — the dive */}
       <motion.div className="absolute inset-0" style={{ scale: contentScale }}>
         <motion.div
           className="absolute left-1/2 top-[44%] -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none"
@@ -222,6 +226,7 @@ export default function DeepDiveSection() {
             img={c.img} title={c.title} cat={c.cat} side={c.side} top={c.top} />
         ))}
       </motion.div>
+      </div>
     </section>
   );
 }
