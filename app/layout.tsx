@@ -34,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${anton.variable} ${barlow.variable} ${oxanium.variable} h-full`}>
-      <body className="h-full bg-[#0a0a0a] text-white antialiased overflow-x-hidden">
+    <html lang="en" className={`${anton.variable} ${barlow.variable} ${oxanium.variable}`}>
+      <body className="bg-[#0a0a0a] text-white antialiased overflow-x-clip">
         {children}
       </body>
     </html>
