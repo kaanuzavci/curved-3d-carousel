@@ -61,36 +61,38 @@ export default function AboutOverlay({ open, onClose }: { open: boolean; onClose
             transition={{ type: "spring", stiffness: 130, damping: 18 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              aria-label="Close"
-              onClick={onClose}
-              className="absolute -top-2 right-0 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors duration-300 hover:border-white/80 hover:text-white"
-              style={{ fontSize: 22, lineHeight: 1 }}
-            >
-              ×
-            </button>
+            {/* header row — title left, close right, clearly separated */}
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="text-[11px] tracking-[0.5em] text-white/45"
+                  style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>ABOUT</p>
+                <h2 className="mt-2.5 text-white leading-[0.95]"
+                  style={{ fontFamily: "var(--font-anton),sans-serif", fontSize: "clamp(36px,7vw,66px)", letterSpacing: "0.03em" }}>
+                  CURVED 3D
+                </h2>
+              </div>
+              <button
+                aria-label="Close"
+                onClick={onClose}
+                className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors duration-300 hover:border-white/80 hover:text-white"
+                style={{ fontSize: 22, lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
 
-            <p className="text-[11px] tracking-[0.5em] text-white/45"
-              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>ABOUT</p>
-            <h2 className="mt-3 text-white leading-[0.95]"
-              style={{ fontFamily: "var(--font-anton),sans-serif", fontSize: "clamp(34px,7vw,68px)", letterSpacing: "0.03em" }}>
-              CURVED 3D
-            </h2>
-
-            <p className="mt-6 text-white/70"
-              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, fontSize: "clamp(14px,2.2vw,17px)", lineHeight: 1.7 }}>
-              No product, no roadmap, no tokens — just a hobby. CURVED 3D is a
-              passion build: a real-time playground for my favourite anime and
-              game characters and a few dreamlike scenes, rendered with Three.js
-              shaders, physics-y motion and Framer Motion, purely for the joy of
-              making things move.
+            <p className="mt-6 max-w-xl text-white/65"
+              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, fontSize: "clamp(13px,1.9vw,16px)", lineHeight: 1.8 }}>
+              No product, no roadmap, no tokens — just a hobby. A real-time
+              playground for my favourite anime &amp; game characters and a few
+              dreamlike scenes, built with Three.js shaders and Framer Motion
+              purely for the joy of making things move.
             </p>
 
-            <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/12 sm:grid-cols-2"
-              style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {FEATURES.map((f) => (
-                <div key={f.k} className="bg-[#05080f] p-5">
-                  <div className="text-[12px] tracking-[0.2em] text-white"
+                <div key={f.k} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                  <div className="text-[14px] tracking-[0.14em] text-white"
                     style={{ fontFamily: "var(--font-anton),sans-serif" }}>{f.k}</div>
                   <div className="mt-2 text-[13px] leading-relaxed text-white/55"
                     style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300 }}>{f.v}</div>
@@ -98,20 +100,32 @@ export default function AboutOverlay({ open, onClose }: { open: boolean; onClose
               ))}
             </div>
 
-            {/* quick-jump — the only fast nav on mobile, where the top bar links hide */}
-            <div className="mt-8">
-              <p className="text-[10px] tracking-[0.4em] text-white/40"
-                style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>JUMP TO</p>
-              <div className="mt-3 flex flex-wrap gap-2.5">
-                {JUMPS.map((j) => (
-                  <a key={j.href} href={j.href} onClick={onClose}
-                    className="rounded-full border border-white/20 px-4 py-2 text-[11px] tracking-[0.18em] text-white/75 transition-colors duration-300 hover:border-white/70 hover:text-white"
-                    style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{j.label}</a>
-                ))}
+            {/* main website + quick-jump */}
+            <div className="mt-8 flex flex-col gap-6 border-t border-white/12 pt-7 sm:flex-row sm:items-center sm:justify-between">
+              <a
+                href="https://kaanuzavci.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/30 px-7 py-3.5 text-white transition-colors duration-300 hover:border-white/80"
+                style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, letterSpacing: "0.2em", fontSize: 12 }}
+              >
+                VISIT MAIN WEBSITE
+                <span className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden>↗</span>
+              </a>
+              <div>
+                <p className="text-[10px] tracking-[0.4em] text-white/40"
+                  style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>JUMP TO</p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {JUMPS.map((j) => (
+                    <a key={j.href} href={j.href} onClick={onClose}
+                      className="rounded-full border border-white/20 px-3.5 py-1.5 text-[11px] tracking-[0.16em] text-white/70 transition-colors duration-300 hover:border-white/70 hover:text-white"
+                      style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{j.label}</a>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <p className="mt-8 text-[11px] tracking-[0.22em] text-white/35"
+            <p className="mt-7 text-[10px] tracking-[0.22em] text-white/30"
               style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>
               BUILT WITH THREE.JS · FRAMER MOTION · LOTTIE · NEXT.JS
             </p>

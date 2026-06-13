@@ -268,7 +268,7 @@ export default function FishTransition() {
         />
 
         {/* ── Closing — rises up OVER the lit reef, no extra page, no fade to black ── */}
-        <motion.div className="absolute inset-0 flex flex-col justify-end" style={{ opacity: closeOpacity }}>
+        <motion.div className="absolute inset-0 flex flex-col items-center justify-end" style={{ opacity: closeOpacity }}>
           {/* gentle deep-blue scrim (NOT black) so the words read while the reef stays visible */}
           <motion.div
             className="absolute inset-0 pointer-events-none"
@@ -277,7 +277,7 @@ export default function FishTransition() {
               background: "linear-gradient(180deg, transparent 34%, rgba(3,18,34,0.42) 72%, rgba(3,18,34,0.72) 100%)",
             }}
           />
-          <motion.div className="relative w-full px-6 pb-[clamp(40px,8vh,96px)] text-center" style={{ y: closeY }}>
+          <motion.div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-6 pb-[clamp(40px,8vh,96px)] text-center" style={{ y: closeY }}>
             <h2
               className="text-white leading-[0.95]"
               style={{
@@ -290,10 +290,11 @@ export default function FishTransition() {
               DIVE<br />BACK IN
             </h2>
             <p
-              className="mx-auto mt-6 max-w-xl text-white/75"
-              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, fontSize: "clamp(13px,1.6vw,17px)", textShadow: "0 2px 18px rgba(0,0,0,0.6)" }}
+              className="mx-auto mt-6 max-w-md text-balance text-white/75"
+              style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, fontSize: "clamp(13px,1.6vw,17px)", lineHeight: 1.7, textShadow: "0 2px 18px rgba(0,0,0,0.6)" }}
             >
-              A passion-built playground of favourite characters and dreamlike worlds — rendered in real-time 3D, just for the love of it.
+              A passion-built playground of favourite characters and dreamlike
+              worlds — rendered in real-time 3D, just for the love of it.
             </p>
             <a
               href="#top"
@@ -303,14 +304,19 @@ export default function FishTransition() {
               BACK TO TOP
               <span className="transition-transform duration-300 group-hover:-translate-y-1">↑</span>
             </a>
-            <div className="mx-auto mt-10 flex max-w-5xl flex-col items-center justify-between gap-4 border-t border-white/15 pt-6 md:flex-row">
+            <div className="mt-10 flex w-full max-w-2xl flex-col items-center justify-between gap-4 border-t border-white/15 pt-6 md:flex-row">
               <p className="text-white/80" style={{ fontFamily: "var(--font-anton),sans-serif", letterSpacing: "0.18em", fontSize: 14 }}>CURVED 3D</p>
               <p className="text-[11px] tracking-[0.18em] text-white/45">© 2026 — A HOBBY BUILD, MADE FOR FUN</p>
-              <div className="flex gap-7">
-                {["X", "INSTAGRAM", "ARTSTATION"].map((s) => (
-                  <a key={s} href="#" className="text-[10px] tracking-[0.22em] text-white/45 transition-colors duration-300 hover:text-white" style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{s}</a>
-                ))}
-              </div>
+              <a
+                href="https://kaanuzavci.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pointer-events-auto inline-flex items-center gap-2 text-[10px] tracking-[0.22em] text-white/70 transition-colors duration-300 hover:text-white"
+                style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}
+              >
+                MAIN WEBSITE
+                <span aria-hidden>↗</span>
+              </a>
             </div>
           </motion.div>
         </motion.div>

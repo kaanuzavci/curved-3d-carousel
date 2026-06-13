@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 import AboutOverlay from "./AboutOverlay";
+import CardGallery from "./CardGallery";
 
 /* Quick-jump targets for the navbar — each "dimension" you scroll into */
 const NAV_LINKS = [
@@ -505,6 +506,7 @@ export default function CylinderCarousel() {
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const goTo = (idx: number) => {
     const cur = ((-Math.round(targetRef.current / THETA)) % N + N) % N;
@@ -743,7 +745,7 @@ export default function CylinderCarousel() {
         style={{ top: 72, bottom: 60 }} />
 
       {/* NAVBAR — transparent glass, background visible through empty areas */}
-      <nav className="absolute top-0 left-0 right-0 z-50 h-[72px] flex items-center justify-between px-8"
+      <nav className="absolute top-0 left-0 right-0 z-50 h-[72px] flex items-center justify-between px-6 sm:px-10 md:px-16"
         style={{
           background: "linear-gradient(180deg, rgba(4,5,14,0.42) 0%, rgba(4,5,14,0.12) 65%, rgba(4,5,14,0) 100%)",
           backdropFilter: "blur(9px)",
@@ -803,6 +805,7 @@ export default function CylinderCarousel() {
         </button>
       </nav>
       <AboutOverlay open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <CardGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
 
       {/* LEFT INFO */}
       <div className="absolute left-10 z-40 pointer-events-none"
@@ -869,8 +872,9 @@ export default function CylinderCarousel() {
 
       {/* BOTTOM RIGHT — card thumbnails */}
       <div className="absolute bottom-7 right-8 z-40 flex items-center gap-5">
-        <span className="text-[9px] tracking-[0.32em] text-white/45 hover:text-white/80 transition-colors cursor-pointer"
-          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>SEE ALL APPS ▶</span>
+        <button onClick={() => setGalleryOpen(true)}
+          className="text-[9px] tracking-[0.32em] text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, background: "none", border: "none" }}>SEE ALL CARDS ▶</button>
         <div className="flex items-center gap-2">
           {CARDS.map((cd, i) => {
             const active = i === activeIdx;
