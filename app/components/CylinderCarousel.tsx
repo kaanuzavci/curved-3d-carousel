@@ -800,7 +800,7 @@ export default function CylinderCarousel() {
         {/* RIGHT — about */}
         <button onClick={() => setAboutOpen(true)}
           className="nav-link text-[11px] tracking-[0.30em]"
-          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, background: "none", border: "none" }}>
+          style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600, background: "none", border: "none", marginRight: 24 }}>
           ABOUT
         </button>
       </nav>
