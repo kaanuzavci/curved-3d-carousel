@@ -2,10 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { motion, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion";
 import CardPrism from "./CardPrism";
-import ForestScene from "./ForestScene";
-import AmbientSound from "./AmbientSound";
 
 /* ═══════════════════════════════════════════════════════════════
    DEEP DIVE — one-viewport scroll section below the hero
@@ -16,6 +14,8 @@ import AmbientSound from "./AmbientSound";
    · Foreground: design cards stream in alternately from the left
      and right edges as you scroll deeper, each on its own
      staggered progress window.
+   · It ends on the grab-and-spin cube gallery, which holds the
+     screen until the section unpins into the marquee below.
    Rendering pauses entirely while the section is off-screen.
 ═══════════════════════════════════════════════════════════════ */
 
@@ -161,7 +161,7 @@ function DiveCard({ prog, img, title, cat, from, to, i, total }: {
      ONE AT A TIME: each gets its own sequential slot with only a little
      overlap, so a fresh card appears as the previous one slides out. */
   const intro = 0.08;                       // title-only stretch first
-  const cardsEnd = 0.38;                     // cards clear out, then the cube takes the stage
+  const cardsEnd = 0.60;                     // cards clear out, then the cube takes the stage
   const slot = (cardsEnd - intro) / total;   // each card's exclusive turn
   const span = slot * 1.85;                  // longer crossing so cards drift across slowly
   const start = intro + i * slot;
@@ -202,11 +202,13 @@ function DiveCard({ prog, img, title, cat, from, to, i, total }: {
    the viewer (rotateY) and lifts as it comes forward, on a spring. */
 const PAIR_CARDS = [
   { img: "/cards/bayc.jpg", title: "BAYC", cat: "COLLECTION", rot: -7, right: "21%", bottom: "15%" },
-  { img: "/cards/ape.jpg",  title: "APE",  cat: "TOKEN",      rot: 6,  right: "5%",  bottom: "5%"  },
+  { img: "/cards/ape.jpg", title: "APE", cat: "TOKEN", rot: 6, right: "5%", bottom: "5%" },
 ] as const;
 
 function WallPair() {
   const [front, setFront] = useState<number | null>(null);
+  // the card whose image is opened full-screen (null = closed)
+  const [opened, setOpened] = useState<(typeof PAIR_CARDS)[number] | null>(null);
   return (
     <>
       {PAIR_CARDS.map((c, i) => (
@@ -220,6 +222,7 @@ function WallPair() {
             : { rotateY: 0, rotate: c.rot, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 110, damping: 15 }}
           onHoverStart={() => setFront(i)}
+          onClick={() => setOpened(c)}
         >
           <div className="relative overflow-hidden rounded-2xl select-none"
             style={{ border: "1px solid rgba(255,255,255,0.16)", boxShadow: "0 30px 75px rgba(0,0,0,0.62)" }}>
@@ -235,6 +238,53 @@ function WallPair() {
           </div>
         </motion.div>
       ))}
+
+      {/* Full-screen viewer — click a card to inspect its image, click to close */}
+      <AnimatePresence>
+        {opened && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-6 cursor-pointer"
+            style={{ background: "rgba(2,4,9,0.92)", backdropFilter: "blur(10px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => setOpened(null)}
+          >
+            <button
+              aria-label="Close"
+              onClick={() => setOpened(null)}
+              className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 text-white/80 transition-colors duration-300 hover:border-white/80 hover:text-white"
+              style={{ fontSize: 22, lineHeight: 1 }}
+            >
+              ×
+            </button>
+            <motion.figure
+              className="relative flex max-h-[90vh] max-w-[92vw] flex-col items-center"
+              initial={{ scale: 0.92, y: 14 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.92, y: 14 }}
+              transition={{ type: "spring", stiffness: 140, damping: 18 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={opened.img}
+                alt={opened.title}
+                draggable={false}
+                className="max-h-[82vh] max-w-[92vw] rounded-2xl object-contain"
+                style={{ boxShadow: "0 40px 120px rgba(0,0,0,0.7)" }}
+              />
+              <figcaption className="mt-5 text-center">
+                <div className="text-[11px] tracking-[0.34em] text-white/55"
+                  style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>{opened.cat}</div>
+                <div className="text-[30px] tracking-[0.08em] text-white"
+                  style={{ fontFamily: "var(--font-anton),sans-serif" }}>{opened.title}</div>
+              </figcaption>
+            </motion.figure>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -242,13 +292,6 @@ function WallPair() {
 export default function DeepDiveSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const waterRef = useRef<HTMLDivElement>(null);
-  // portal → forest layers (driven imperatively from scroll)
-  const forestRef = useRef<HTMLDivElement>(null);
-  const veilRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const raysRef = useRef<HTMLDivElement>(null);
-  const bloomRef = useRef<HTMLDivElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
 
   /* The wrapper is 2 viewports tall with a sticky 1-viewport child:
      the section first slides in untouched; once it fully covers the
@@ -263,45 +306,7 @@ export default function DeepDiveSection() {
   // React state + CSS transition (framer skips DOM opacity flushes on a
   // transform-less layer).
   const [galleryShown, setGalleryShown] = useState(false);
-  useMotionValueEvent(scrollYProgress, "change", (v) => setGalleryShown(v > 0.4 && v < 0.6));
-
-  /* The dive doesn't hand off to a new page — the SAME pinned screen keeps
-     going deeper: the scene darkens, a pin-prick of light opens where the
-     cube was, swells into a portal, floods white, and we step through it
-     into the forest. All driven imperatively from one scroll value. */
-  useEffect(() => {
-    const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
-    const smooth = (e0: number, e1: number, x: number) => { const t = clamp((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
-    const bell = (c: number, w: number, x: number) => Math.exp(-((x - c) * (x - c)) / (2 * w * w));
-    const apply = (p: number) => {
-      const veilIn = smooth(0.50, 0.60, p);            // scene darkens — going deeper
-      const grow = smooth(0.60, 0.86, p);              // the hole swells open
-      const holeR = 1.5 + grow * grow * 172;
-      const feather = 4 + (1 - grow) * 10;
-      if (veilRef.current) {
-        const mask = `radial-gradient(circle at 50% 47%, transparent ${holeR}vmax, #000 ${holeR + feather}vmax)`;
-        veilRef.current.style.webkitMaskImage = mask;
-        veilRef.current.style.maskImage = mask;
-        veilRef.current.style.opacity = String(veilIn);
-      }
-      if (forestRef.current) {
-        forestRef.current.style.opacity = String(smooth(0.58, 0.62, p));   // appears under cover of the dark veil
-        forestRef.current.style.transform = `scale(${1.2 - smooth(0.62, 0.9, p) * 0.2})`;
-        forestRef.current.style.filter = `brightness(${0.72 + smooth(0.62, 0.86, p) * 0.28})`;
-      }
-      if (ringRef.current) {
-        const inner = Math.max(holeR - 5, 0);
-        ringRef.current.style.background = `radial-gradient(circle at 50% 47%, transparent ${inner}vmax, rgba(255,252,235,0.95) ${holeR}vmax, rgba(255,239,196,0.35) ${holeR + 5}vmax, transparent ${holeR + 16}vmax)`;
-        ringRef.current.style.opacity = String(clamp(bell(0.70, 0.11, p)) * (p < 0.9 ? 1 : 0));
-      }
-      if (raysRef.current) raysRef.current.style.opacity = String(clamp(smooth(0.58, 0.68, p) - smooth(0.84, 0.92, p)) * 0.85);
-      if (bloomRef.current) bloomRef.current.style.opacity = String(clamp(bell(0.76, 0.06, p)) * 0.95);
-      if (hintRef.current) hintRef.current.style.opacity = String(clamp(smooth(0.9, 0.98, p)));
-    };
-    apply(scrollYProgress.get());
-    const unsub = scrollYProgress.on("change", apply);
-    return () => unsub();
-  }, [scrollYProgress]);
+  useMotionValueEvent(scrollYProgress, "change", (v) => setGalleryShown(v > 0.66));
 
   useEffect(() => {
     const el = waterRef.current, sec = sectionRef.current;
@@ -404,7 +409,7 @@ export default function DeepDiveSection() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={sectionRef} className="relative h-[1000dvh]">
+    <section ref={sectionRef} className="relative h-[400dvh]">
       <div className="sticky top-0 h-dvh overflow-hidden bg-[#020409]">
         {/* Water shader canvas */}
         <div ref={waterRef} className="absolute inset-0" />
@@ -445,54 +450,9 @@ export default function DeepDiveSection() {
             style={{ top: "7%", left: "4%", width: "min(500px,52vw)", height: "min(500px,52vw)" }}>
             <CardPrism />
           </div>
-          <p className="absolute left-[6%] text-[10px] tracking-[0.4em] text-white/45"
-            style={{ top: "4%", fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 600 }}>
-            DRAG TO SPIN
-          </p>
           <WallPair />
         </div>
-
-        {/* ── In-place portal: the same screen pushes deeper, light opens here,
-              and we step through it into the forest (no separate section) ── */}
-        {/* Forest, revealed through the growing hole (hidden behind the veil until then) */}
-        <div ref={forestRef} className="absolute inset-0 pointer-events-none will-change-transform"
-          style={{ opacity: 0, transform: "scale(1.2)" }}>
-          <ForestScene />
-        </div>
-        {/* Dark veil with a hole punched through it — going deeper into the dark */}
-        <div ref={veilRef} className="absolute inset-0 pointer-events-none"
-          style={{ opacity: 0, background: "radial-gradient(120% 120% at 50% 47%, #06121e 0%, #02040a 70%)" }} />
-        {/* Light shafts fanning out of the opening */}
-        <div ref={raysRef} className="absolute inset-0 pointer-events-none" style={{ mixBlendMode: "screen", opacity: 0 }}>
-          <div className="dd-portal-rays absolute left-1/2 top-[47%] h-[260vmax] w-[260vmax] -translate-x-1/2 -translate-y-1/2"
-            style={{
-              background: "repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,251,232,0) 0deg, rgba(255,251,232,0.5) 2.2deg, rgba(255,251,232,0) 5deg)",
-              WebkitMaskImage: "radial-gradient(circle at 50% 50%, #000 0%, transparent 62%)",
-              maskImage: "radial-gradient(circle at 50% 50%, #000 0%, transparent 62%)",
-            }} />
-        </div>
-        {/* Hot glowing rim around the hole */}
-        <div ref={ringRef} className="absolute inset-0 pointer-events-none" style={{ mixBlendMode: "screen", opacity: 0 }} />
-        {/* White bloom — the moment of passing through the light */}
-        <div ref={bloomRef} className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(60% 60% at 50% 47%, #fffef8 0%, rgba(255,250,235,0.6) 40%, rgba(255,250,235,0) 75%)",
-          mixBlendMode: "screen", opacity: 0,
-        }} />
-        {/* Arrival word + ambient sound toggle */}
-        <div ref={hintRef} className="absolute inset-x-0 bottom-[12%] flex flex-col items-center gap-5 pointer-events-none" style={{ opacity: 0 }}>
-          <p className="text-[clamp(13px,2vw,20px)] tracking-[0.62em] text-[#eafbe6]"
-            style={{ fontFamily: "var(--font-oxanium),sans-serif", fontWeight: 300, textShadow: "0 2px 30px rgba(0,0,0,0.5)" }}>
-            BREATHE
-          </p>
-          <AmbientSound />
-        </div>
       </div>
-
-      <style>{`
-        @keyframes ddPortalSpin { to { transform: translate(-50%,-50%) rotate(360deg) } }
-        .dd-portal-rays{ animation: ddPortalSpin 60s linear infinite; }
-        @media (prefers-reduced-motion: reduce){ .dd-portal-rays{ animation: none } }
-      `}</style>
     </section>
   );
 }

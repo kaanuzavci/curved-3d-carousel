@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import CylinderCarousel from "./CylinderCarousel";
 import DeepDiveSection from "./DeepDiveSection";
+import MarqueeSection from "./MarqueeSection";
+import FishTransition from "./FishTransition";
 import Preloader from "./Preloader";
 
 /* Everything the first screen needs. The carousel itself is mounted
@@ -58,6 +60,8 @@ export default function HomeShell() {
     <>
       <CylinderCarousel />
       <DeepDiveSection />
+      <MarqueeSection />
+      <FishTransition />
       <AnimatePresence>{!ready && <Preloader progress={progress} />}</AnimatePresence>
     </>
   );
